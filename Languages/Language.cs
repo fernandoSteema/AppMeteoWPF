@@ -16,8 +16,8 @@ namespace AppMeteo.Languages
         private static void Load(string file)
         {
             info.Clear();
-            //foreach (string line in File.ReadLines($"LANG\\{file}"))
-            foreach (string line in File.ReadLines($"..\\..\\..\\LANG\\{file}"))
+          
+            foreach (string line in File.ReadLines($"..\\..\\..\\Languages\\{file}.txt"))
             {
                 if (line.Contains("="))
                 {
@@ -26,29 +26,27 @@ namespace AppMeteo.Languages
                 }
             }
         }
-        //public static void ChangeLenguage(string file)
-        //{
-        //    Properties.Settings config = new Properties.Settings();
-        //    config.lang = file;
-        //    config.Save();
-        //    Load(file);
+        public static void ChangeLenguage(string file)
+        {
+            Properties.Settings config = new Properties.Settings();
+            config.lang = file;
+            config.Save();
+            Load(file);
 
-        //    if (Application.OpenForms["Form1"] is Form1 form1)
-        //    {
-        //        form1.UpdateChartLanguage();
-        //        form1.btnDays.Text = Language.info.ContainsKey("btnDays") ? Language.info["btnDays"] : "Days";
-        //        form1.btnHours.Text = Language.info.ContainsKey("btnHours") ? Language.info["btnHours"] : "Hours";
-        //        form1.UpdateAnnotations();
-        //        Aquí actualizamos solo los nombres de los días sin recargar el gráfico
-        //        form1.UpdateAndLoadForecastDays();
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+            {
+                // Actualiza etiquetas y contenido traducido
+                //mainWindow.UpdateChartLanguage();
+                //mainWindow.btmDays.Content = Language.info.ContainsKey("btmDays") ? Language.info["btmDays"] : "Days";
+                //mainWindow.btnHours.Content = Language.info.ContainsKey("btnHours") ? Language.info["btnHours"] : "Hours";
+                mainWindow.UpdateAnnotations();
 
-        //        if (form1.btnDay)
-        //        {
-        //            form1.GetAllTemperaturesByDays(form1.currentCity);
-        //        }
+                // Solo actualizamos nombres de días
+                mainWindow.UpdateAndLoadForecastDays();
 
-        //    }
-        //}
+
+            }
+        }
 
         //public static void Controllers(Form form)
         //{

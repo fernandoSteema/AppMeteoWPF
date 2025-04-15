@@ -1,6 +1,7 @@
 ﻿using System.Configuration;
 using System.Data;
 using System.Windows;
+using AppMeteo.Languages;
 
 namespace AppMeteo
 {
@@ -9,6 +10,7 @@ namespace AppMeteo
     /// </summary>
     public partial class App : Application
     {
+       
     }
 
 }
