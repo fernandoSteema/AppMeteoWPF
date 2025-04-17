@@ -17,15 +17,16 @@ namespace AppMeteo.Languages
         {
             info.Clear();
           
-            foreach (string line in File.ReadLines($"..\\..\\..\\Languages\\{file}.txt"))
+            foreach (string line in File.ReadLines($"..\\..\\..\\Languages\\{file}"))
             {
                 if (line.Contains("="))
                 {
                     string[] camps = line.Split('=');
-                    info.Add(camps[0].Trim(), camps[1].Trim());
+                    info[camps[0].Trim()] = camps[1].Trim();
                 }
             }
         }
+
         public static void ChangeLenguage(string file)
         {
             Properties.Settings config = new Properties.Settings();
@@ -35,74 +36,29 @@ namespace AppMeteo.Languages
 
             if (Application.Current.MainWindow is MainWindow mainWindow)
             {
-                // Actualiza etiquetas y contenido traducido
-                //mainWindow.UpdateChartLanguage();
-                //mainWindow.btmDays.Content = Language.info.ContainsKey("btmDays") ? Language.info["btmDays"] : "Days";
-                //mainWindow.btnHours.Content = Language.info.ContainsKey("btnHours") ? Language.info["btnHours"] : "Hours";
-                mainWindow.UpdateAnnotations();
+                
+                mainWindow.UpdateChartLanguage();
 
-                // Solo actualizamos nombres de días
+                if (mainWindow.btnDays != null)
+                    mainWindow.btnDays.Content = Language.info.ContainsKey("btnDays") ? Language.info["btnDays"] : "Days";
+
+                if (mainWindow.btnHours != null)
+                    mainWindow.btnHours.Content = Language.info.ContainsKey("btnHours") ? Language.info["btnHours"] : "Hours";
+
+                mainWindow.UpdateAnnotations();
+                
                 mainWindow.UpdateAndLoadForecastDays();
+
+                if (mainWindow.btnDayActivate)
+                {
+                    if (mainWindow.ChartTemp == null) return;
+
+                    mainWindow.GetAllTemperaturesByDays(mainWindow.currentCity);
+                }
 
 
             }
         }
-
-        //public static void Controllers(Form form)
-        //{
-        //    if (form == null)
-        //    {
-        //        MessageBox.Show("ERROR: El formulario es nulo.");
-        //        return;
-        //    }
-
-        //    if (info == null || info.Count == 0)
-        //    {
-        //        MessageBox.Show("ERROR: La colección 'info' está vacía o no inicializada.");
-        //        return;
-        //    }
-
-        //    foreach (string control in info.Keys)
-        //    {
-        //        try
-        //        {
-        //            Control foundControl = form.Controls[control];
-
-        //            if (foundControl != null)
-        //            {
-        //                foundControl.Text = info[control];
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            MessageBox.Show("ERROR: " + ex.Message);
-        //        }
-        //    }
-        //}
-
-        //public static void UpdateMenuStrip(MenuStrip menu)
-        //{
-        //    foreach (ToolStripMenuItem item in menu.Items)
-        //    {
-        //        UpdateMenuItem(item);
-        //    }
-        //}
-
-        //private static void UpdateMenuItem(ToolStripMenuItem item)
-        //{
-        //    if (info.ContainsKey(item.Name))
-        //    {
-        //        item.Text = info[item.Name];
-        //    }
-
-        //    foreach (ToolStripItem subItem in item.DropDownItems)
-        //    {
-        //        if (subItem is ToolStripMenuItem subMenuItem)
-        //        {
-        //            UpdateMenuItem(subMenuItem);
-        //        }
-        //    }
-        //}
     }
 }
  

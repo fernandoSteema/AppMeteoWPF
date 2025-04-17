@@ -33,12 +33,13 @@
 
         <!-- 🔤 Selector de idioma -->
         <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="5" HorizontalAlignment="Left">
-            <TextBlock Text="Language:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <ComboBox Name="cmbLanguage" Width="100" SelectionChanged="cmbLanguage_SelectionChanged">
-                <ComboBoxItem Content="Español" Tag="es" IsSelected="True"/>
-                <ComboBoxItem Content="Català" Tag="ca"/>
-                <ComboBoxItem Content="English" Tag="en"/>
-            </ComboBox>
+            <Menu HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5">
+                <MenuItem Header="🌐 Language">
+                    <MenuItem Header="English" Tag="en" IsChecked="True" Name="englishMenuItem" Click="englishMenuItem_Click"/>
+                    <MenuItem Header="Català" Tag="ca" Name="catalanMenuItem" Click="catalanMenuItem_Click"/>
+                    <MenuItem Header="Español" Tag="es" Name="spanishMenuItem" Click="spanishMenuItem_Click"/>
+                </MenuItem>
+            </Menu>
         </StackPanel>
 
 
@@ -90,7 +91,7 @@
 
         <!-- 📌 Botones encima del TabControl -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="3" Margin="5">
-            <Button Name="btmDays" Content="Days" Width="120" Margin="5"/>
+            <Button Name="btnDays" Content="Days" Width="120" Margin="5" Click="btnDays_Click"/>
             <Button Name="btnHours" Content="Hours" Width="120" Margin="5" Click="btnHours_Click"/>
         </StackPanel>
 
@@ -104,14 +105,14 @@
 
                     <Grid Grid.Row="0">
                         <teechart:TChart Name="ChartTemp" Visibility="Visible" 
-                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                          AfterDraw="ChartTemp_AfterDraw" Scroll="ChartTemp_Scroll"/>
+                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                          AfterDraw="ChartTemp_AfterDraw" Scroll="ChartTemp_Scroll" Margin="20,0"/>
 
                         <ComboBox Name="cmbDays" Width="130" 
                                   Height="22" 
                                   Margin="10,10,0,0" 
                                   VerticalAlignment="Top" 
-                                  HorizontalAlignment="Left">
+                                  HorizontalAlignment="Left" SelectionChanged="cmbDays_SelectionChanged">
                         </ComboBox>
 
                     </Grid>
@@ -130,6 +131,7 @@
 
                 </Grid>
             </TabItem>
+            
             <TabItem Header="Temperature/Humidity">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -138,7 +140,7 @@
                     </Grid.RowDefinitions>
 
                     <teechart:TChart Name="ChartTempAndHumidity" Visibility="Visible" 
-                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="20,0"
                                      Grid.Row="0"/>
 
 
