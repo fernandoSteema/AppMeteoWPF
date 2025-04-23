@@ -8,6 +8,7 @@ using System.Windows.Annotations;
 using System.Windows.Controls;
 
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using AppMeteo.Controllers;
 using AppMeteo.Languages;
@@ -16,6 +17,7 @@ using Steema.TeeChart;
 using Steema.TeeChart.Styles;
 using Steema.TeeChart.Tools;
 using Annotation = Steema.TeeChart.Tools.Annotation;
+using Color = System.Drawing.Color;
 
 namespace AppMeteo
 {
@@ -249,6 +251,7 @@ namespace AppMeteo
                 ChartTemp.Series.Add(barSeries);
                 ChartTemp.Legend.Visible = false;
                 ChartTemp[0].Marks.Visible = false;
+                ChartTemp.Axes.Left.Labels.Visible = false;
             }
             else
             {
@@ -317,6 +320,8 @@ namespace AppMeteo
             scrollBarGrafico.Visibility = Visibility.Visible;
             cmbDays.Visibility = Visibility.Visible;
             scrollBarGrafico.Visibility = Visibility.Visible;
+            
+
             btnDayActivate = false;
 
             verticalLinePositions.Clear();
@@ -324,15 +329,22 @@ namespace AppMeteo
             if (ChartTemp.Series.Count == 0)
             {
                 barSeries = new Bar();
-
                 ChartTemp.Series.Add(barSeries);
                 ChartTemp.Legend.Visible = false;
-                ChartTemp[0].Marks.Visible = false;
+                ChartTemp.Series[0].Marks.Visible = false;
             }
             else
             {
+                // Asegurarse de que solo tenemos una serie
+                while (ChartTemp.Series.Count > 1)
+                {
+                    ChartTemp.Series.RemoveAt(1);
+                }
                 barSeries = (Bar)ChartTemp.Series[0];
+                barSeries.Clear();
             }
+
+            ChartTemp.Axes.Left.Labels.Visible = false;
 
             if (ChartTemp.Series.Count > 0)
             {
@@ -340,11 +352,6 @@ namespace AppMeteo
                 iconosPorDia.Clear();
                 diasConFechas.Clear();
             }
-
-            barSeries.ColorEach = false;
-            barSeries.Transparency = 70;
-            ChartTemp.Panning.Allow = ScrollModes.None;
-            ChartTemp.Zoom.Active = false;
 
             string headerTxt = Languages.Language.info.ContainsKey("Forecast_by_hour") ? Languages.Language.info["Forecast_by_hour"] : "Previsió per hores";
             ChartTemp.Header.Text = headerTxt;
@@ -635,8 +642,13 @@ namespace AppMeteo
         private void btnDays_Click(object sender, RoutedEventArgs e)
         {
             btnDayActivate = true;
-            string city = txtCity.Text;
-            GetAllTemperaturesByDays(city);
+            string city = txtSearch.Text.Trim();
+
+            if (!string.IsNullOrEmpty(city))
+            {
+                GetAllTemperaturesByDays(city);
+            }
+           
         }
         private void txtSearch_KeyDown(object sender, KeyEventArgs e)
         {
@@ -737,8 +749,11 @@ namespace AppMeteo
 
                         var tChartImage = new Steema.TeeChart.WPF.Drawing.TImage(bitmap);
 
-                        int iconWidth = bitmap.PixelWidth;
-                        int iconHeight = bitmap.PixelHeight;
+                        double dpiScale = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
+
+                        int iconWidth = (int)(bitmap.PixelWidth * dpiScale);
+                        int iconHeight = (int)(bitmap.PixelHeight * dpiScale);
+
                         int xPos = (int)ChartTemp.Axes.Bottom.CalcPosValue(s.XValues[index]) - (iconWidth / 2);
                         int yPos = (int)ChartTemp.Axes.Left.CalcPosValue(s.YValues[index]) - (iconHeight / 2);
 

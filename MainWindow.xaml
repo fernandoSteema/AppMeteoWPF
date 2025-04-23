@@ -4,149 +4,161 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AppMeteo"
-          xmlns:teechart="clr-namespace:Steema.TeeChart.WPF;assembly=TeeChart.WPF" 
+        xmlns:teechart="clr-namespace:Steema.TeeChart.WPF;assembly=TeeChart.WPF"
         mc:Ignorable="d"
-        Title="WPFMeteoApp" Height="500" Width="800" WindowState="Maximized">
+        Title="WPFMeteoApp" Height="838" Width="1517" WindowState="Maximized">
 
-    <Grid Margin="10">
-        <!-- Columnas -->
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*" />
-            <ColumnDefinition Width="1*" />
-        </Grid.ColumnDefinitions>
+    <DockPanel LastChildFill="True">
 
-        <!-- Filas -->
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+        <!-- 🌡️ Parte superior centrada -->
+        <Grid DockPanel.Dock="Top" Margin="10" HorizontalAlignment="Center" VerticalAlignment="Top">
+            <!-- Columnas -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Filas -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="125*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
             <!-- 🔤 Selector de idioma -->
-            <RowDefinition Height="Auto" />
-            <!-- 🔍 Búsqueda -->
-            <RowDefinition Height="Auto" />
-            <!-- 🌡️ Datos actuales -->
-            <RowDefinition Height="Auto" />
-            <!-- 📌 Botones -->
-            <RowDefinition Height="*" />
-            <!-- 📊 Gráficos -->
-            <RowDefinition Height="Auto"/>
-            <!-- 🦶 Footer -->
-        </Grid.RowDefinitions>
-
-        <!-- 🔤 Selector de idioma -->
-        <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="5" HorizontalAlignment="Left">
-            <Menu HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5">
-                <MenuItem Header="🌐 Language">
-                    <MenuItem Header="English" Tag="en" IsChecked="True" Name="englishMenuItem" Click="englishMenuItem_Click"/>
-                    <MenuItem Header="Català" Tag="ca" Name="catalanMenuItem" Click="catalanMenuItem_Click"/>
-                    <MenuItem Header="Español" Tag="es" Name="spanishMenuItem" Click="spanishMenuItem_Click"/>
-                </MenuItem>
-            </Menu>
-        </StackPanel>
-
-
-        <!-- 🔍 Barra de Búsqueda -->
-        <Grid Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10">
-                <TextBlock Text="The weather in..." VerticalAlignment="Center" FontSize="16" Margin="5"/>
-                <TextBox Name="txtSearch" Width="200" Height="30" Margin="5" KeyDown="txtSearch_KeyDown"/>
-                <Button Name="btnSearch" Content="🔍" Width="40" Height="30" Margin="5" Click="btnSearch_Click_1"/>
+            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="5" HorizontalAlignment="Left">
+                <Menu HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5">
+                    <MenuItem Header="🌐 Language">
+                        <MenuItem Header="English" Tag="en" IsChecked="True" Name="englishMenuItem" Click="englishMenuItem_Click"/>
+                        <MenuItem Header="Català" Tag="ca" Name="catalanMenuItem" Click="catalanMenuItem_Click"/>
+                        <MenuItem Header="Español" Tag="es" Name="spanishMenuItem" Click="spanishMenuItem_Click"/>
+                    </MenuItem>
+                </Menu>
             </StackPanel>
+
+            <!-- 🔍 Barra de Búsqueda -->
+            <Grid Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10">
+                    <TextBlock Text="The weather in..." VerticalAlignment="Center" FontSize="16" Margin="5"/>
+                    <TextBox Name="txtSearch" Width="200" Height="30" Margin="5" KeyDown="txtSearch_KeyDown"/>
+                    <Button Name="btnSearch" Content="🔍" Width="40" Height="30" Margin="5" Click="btnSearch_Click_1"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- 📍 Lista de ciudades recientes -->
+            <ListBox Name="lstCities" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
+                 Width="150" Height="Auto" Margin="5" SelectionChanged="lstCities_SelectionChanged">
+                <ListBoxItem Content="Madrid"/>
+                <ListBoxItem Content="Barcelona"/>
+                <ListBoxItem Content="Valencia"/>
+                <ListBoxItem Content="Sevilla"/>
+            </ListBox>
+
+            <!-- 🌡️ Temperatura actual -->
+            <Grid Grid.Column="0" Grid.Row="2" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                    <!-- Temperatura + Icono -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Name="txtTemperature"
+                           FontSize="40" FontWeight="Bold" Foreground="Black"
+                           VerticalAlignment="Center"
+                           Text="--ºC" Margin="0,0,10,0"/>
+
+                        <Image Name="imgWeatherIcon"
+                           Width="60" Height="60" 
+                           VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Ciudad + Región -->
+                    <StackPanel Orientation="Vertical" Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Name="txtCity" FontSize="20" FontWeight="Bold"
+                           Foreground="Black" Text="Ciudad"/>
+                        <TextBlock Name="txtRegion" FontSize="14" Foreground="DarkGray"
+                           Text="Provincia, País"/>
+                    </StackPanel>
+
+                </StackPanel>
+            </Grid>
         </Grid>
 
-        <!-- 📍 Lista de ciudades recientes -->
-        <ListBox Name="lstCities" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
-             Width="150" Height="Auto" Margin="5" SelectionChanged="lstCities_SelectionChanged">
-            <ListBoxItem Content="Madrid"/>
-            <ListBoxItem Content="Barcelona"/>
-            <ListBoxItem Content="Valencia"/>
-            <ListBoxItem Content="Sevilla"/>
-        </ListBox>
+        <Grid DockPanel.Dock="Bottom" Margin="50,20,50,20" Width="1166">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <!-- 🌡️ Temperatura actual -->
-        <Grid Grid.Column="0" Grid.Row="2" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-
-                <!-- Temperatura + Icono -->
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Name="txtTemperature"
-                       FontSize="40" FontWeight="Bold" Foreground="Black"
-                       VerticalAlignment="Center"
-                       Text="--ºC" Margin="0,0,10,0"/>
-
-                    <Image Name="imgWeatherIcon"
-                   Width="60" Height="60" 
-                   VerticalAlignment="Center"/>
-                </StackPanel>
-
-                <!-- Ciudad + Región -->
-                <StackPanel Orientation="Vertical" Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Name="txtCity" FontSize="20" FontWeight="Bold"
-                       Foreground="Black" Text="Ciudad"/>
-                    <TextBlock Name="txtRegion" FontSize="14" Foreground="DarkGray"
-                       Text="Provincia, País"/>
-                </StackPanel>
-
+            <!-- 📌 Botones encima del TabControl -->
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Left" 
+                        Margin="0,0,0,10"
+                        Grid.Row="0"> 
+                
+                <Button Name="btnDays" Content="Days" Width="120" Margin="5" Click="btnDays_Click"/>
+                <Button Name="btnHours" Content="Hours" Width="120" Margin="5" Click="btnHours_Click"/>
             </StackPanel>
-        </Grid>
 
+            <!-- 📊 TabControl como T invertida -->
+            <TabControl Grid.Row="1"
+                        Height="488" Width="1157">
+                
+                <TabItem Header="Temperatura">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-        <!-- 📌 Botones encima del TabControl -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0" Grid.Row="3" Margin="5">
-            <Button Name="btnDays" Content="Days" Width="120" Margin="5" Click="btnDays_Click"/>
-            <Button Name="btnHours" Content="Hours" Width="120" Margin="5" Click="btnHours_Click"/>
-        </StackPanel>
+                        <Grid Grid.Row="0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="321*"/>
+                                <RowDefinition Height="23*"/>
+                            </Grid.RowDefinitions>
+                            <teechart:TChart Name="ChartTemp" Visibility="Visible"
+                                  HorizontalAlignment="Center"
+                                  AfterDraw="ChartTemp_AfterDraw" 
+                                  Scroll="ChartTemp_Scroll"
+                                  MaxWidth="1157"
+                                  Height="402" Margin="0,0,0,-58" Grid.RowSpan="2"/>
 
-        <TabControl Grid.Column="0" Grid.Row="4" Margin="5">
-            <TabItem Header="Temperatura">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                            <ComboBox Name="cmbDays" Width="130" 
+                           Height="22" 
+                           Margin="10,10,0,0" 
+                           VerticalAlignment="Top" 
+                           HorizontalAlignment="Left" SelectionChanged="cmbDays_SelectionChanged">
+                            </ComboBox>
+                        </Grid>
 
-                    <Grid Grid.Row="0">
-                        <teechart:TChart Name="ChartTemp" Visibility="Visible" 
-                          HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                          AfterDraw="ChartTemp_AfterDraw" Scroll="ChartTemp_Scroll" Margin="20,0"/>
-
-                        <ComboBox Name="cmbDays" Width="130" 
-                                  Height="22" 
-                                  Margin="10,10,0,0" 
-                                  VerticalAlignment="Top" 
-                                  HorizontalAlignment="Left" SelectionChanged="cmbDays_SelectionChanged">
-                        </ComboBox>
-
+                        <ScrollBar Name="scrollBarGrafico"
+                        Orientation="Horizontal"
+                        Grid.Row="1"
+                        Minimum="0"
+                        Maximum="100"
+                        LargeChange="10"
+                        SmallChange="1"
+                        Value="0"
+                        Margin="5"
+                        Height="20" Scroll="scrollBarGrafico_Scroll" 
+             />
                     </Grid>
+                </TabItem>
 
-                    <ScrollBar Name="scrollBarGrafico"
-                               Orientation="Horizontal"
-                               Grid.Row="1"
-                               Minimum="0"
-                               Maximum="100"
-                               LargeChange="10"
-                               SmallChange="1"
-                               Value="0"
-                               Margin="5"
-                               Height="20" Scroll="scrollBarGrafico_Scroll" 
-                    />
+                <TabItem Header="Temperature/Humidity">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                </Grid>
-            </TabItem>
-            
-            <TabItem Header="Temperature/Humidity">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    <teechart:TChart Name="ChartTempAndHumidity" Visibility="Visible" 
-                                     HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="20,0"
-                                     Grid.Row="0"/>
-
-
-                </Grid>
-            </TabItem>
-        </TabControl>
-
-    </Grid>
+                        <teechart:TChart Name="ChartTempAndHumidity" Visibility="Visible" 
+                              HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="20,0"
+                              Grid.Row="0"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+       
+    </DockPanel>
 </Window>
