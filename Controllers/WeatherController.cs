@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace AppMeteo.Controllers
 {
-    public class MeteoController
+    public class WeatherController
     {
         private HttpClient client;
         private const string API_KEY = "41e4e0b33c464f47a78114036251402";
@@ -27,7 +27,7 @@ namespace AppMeteo.Controllers
         private static Dictionary<string, (Forecast, DateTime)> tempCacheBy10Days = new Dictionary<string, (Forecast, DateTime)>();
         private static readonly TimeSpan tempCacheBy10DaysDuration = TimeSpan.FromHours(6);
 
-        public MeteoController()
+        public WeatherController()
         {
             client = new HttpClient();
         }

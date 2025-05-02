@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="LottieSharp" Version="2.4.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Steema.TeeChart.NET" Version="4.2025.3.9" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.3" />

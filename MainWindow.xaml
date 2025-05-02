@@ -50,10 +50,10 @@
             <!-- 📍 Lista de ciudades recientes -->
             <ListBox Name="lstCities" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"
                  Width="150" Height="Auto" Margin="5" SelectionChanged="lstCities_SelectionChanged">
-                <ListBoxItem Content="Madrid"/>
+                <ListBoxItem Content="Girona"/>
                 <ListBoxItem Content="Barcelona"/>
-                <ListBoxItem Content="Valencia"/>
-                <ListBoxItem Content="Sevilla"/>
+                <ListBoxItem Content="Birmingham"/>
+                <ListBoxItem Content="Paris"/>
             </ListBox>
 
             <!-- 🌡️ Temperatura actual -->
@@ -121,7 +121,7 @@
                                   AfterDraw="ChartTemp_AfterDraw" 
                                   Scroll="ChartTemp_Scroll"
                                   MaxWidth="1157"
-                                  Height="402" Margin="0,0,0,-58" Grid.RowSpan="2"/>
+                                  Height="402" Margin="0,0,0,-58" Grid.RowSpan="2" BeforeDrawSeries="ChartTemp_BeforeDrawSeries"/>
 
                             <ComboBox Name="cmbDays" Width="130" 
                            Height="22" 
@@ -131,7 +131,7 @@
                             </ComboBox>
                         </Grid>
 
-                        <ScrollBar Name="scrollBarGrafico"
+                        <ScrollBar Name="scrollBarChart"
                         Orientation="Horizontal"
                         Grid.Row="1"
                         Minimum="0"
