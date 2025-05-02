@@ -75,7 +75,7 @@
                     <!-- Ciudad + Región -->
                     <StackPanel Orientation="Vertical" Margin="0,10,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <TextBlock Name="txtCity" FontSize="20" FontWeight="Bold"
-                           Foreground="Black" Text="Ciudad"/>
+                           Foreground="Black" Text="City"/>
                         <TextBlock Name="txtRegion" FontSize="14" Foreground="DarkGray"
                            Text="Provincia, País"/>
                     </StackPanel>
@@ -84,13 +84,13 @@
             </Grid>
         </Grid>
 
-        <Grid DockPanel.Dock="Bottom" Margin="50,20,50,20" Width="1166">
+        <Grid DockPanel.Dock="Bottom" Margin="50,20,50,20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 📌 Botones encima del TabControl -->
+            <!--  Botones encima del TabControl -->
             <StackPanel Orientation="Horizontal"
                         HorizontalAlignment="Left" 
                         Margin="0,0,0,10"
@@ -100,11 +100,9 @@
                 <Button Name="btnHours" Content="Hours" Width="120" Margin="5" Click="btnHours_Click"/>
             </StackPanel>
 
-            <!-- 📊 TabControl como T invertida -->
-            <TabControl Grid.Row="1"
-                        Height="488" Width="1157">
-                
-                <TabItem Header="Temperatura">
+
+            <TabControl Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <TabItem Header="Temperature">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
@@ -116,18 +114,20 @@
                                 <RowDefinition Height="321*"/>
                                 <RowDefinition Height="23*"/>
                             </Grid.RowDefinitions>
+                            
                             <teechart:TChart Name="ChartTemp" Visibility="Visible"
-                                  HorizontalAlignment="Center"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
                                   AfterDraw="ChartTemp_AfterDraw" 
                                   Scroll="ChartTemp_Scroll"
-                                  MaxWidth="1157"
-                                  Height="402" Margin="0,0,0,-58" Grid.RowSpan="2" BeforeDrawSeries="ChartTemp_BeforeDrawSeries"/>
+                                  Margin="10" Grid.RowSpan="2" BeforeDrawSeries="ChartTemp_BeforeDrawSeries"
+                            />
 
                             <ComboBox Name="cmbDays" Width="130" 
-                           Height="22" 
-                           Margin="10,10,0,0" 
-                           VerticalAlignment="Top" 
-                           HorizontalAlignment="Left" SelectionChanged="cmbDays_SelectionChanged">
+                                      Height="22" 
+                                      Margin="10,10,0,0" 
+                                      VerticalAlignment="Top" 
+                                      HorizontalAlignment="Left" SelectionChanged="cmbDays_SelectionChanged">  
                             </ComboBox>
                         </Grid>
 
@@ -141,7 +141,8 @@
                         Value="0"
                         Margin="5"
                         Height="20" Scroll="scrollBarGrafico_Scroll" 
-             />
+                        />
+                        
                     </Grid>
                 </TabItem>
 
