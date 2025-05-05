@@ -59,7 +59,8 @@ namespace AppMeteo
             AppMeteo.Languages.Language.ChangeLenguage(Properties.Settings.Default.lang);
             cmbDays.Visibility = Visibility.Collapsed;
             scrollBarChart.Visibility = Visibility.Collapsed;
-
+            ChartTemp.Zoom.Allow = false;
+            ChartTempAndHumidity.Zoom.Allow = false;
         }
 
 
@@ -176,7 +177,7 @@ namespace AppMeteo
             if (ChartTempAndHumidity == null || allTemperatures == null || allTemperatures.forecastday.Count == 0)
                 return;
 
-            string headerTxt = Languages.Language.info.ContainsKey("Forecast_by_hour") ? Languages.Language.info["Forecast_by_hour"] : "Previsió per hores";
+            string headerTxt = Languages.Language.info.ContainsKey("Forecast_by_hour") ? Languages.Language.info["Forecast_by_hour"] : "PREVICIÓ PER HORES";
             ChartTemp.Header.Text = headerTxt;
 
             // Get translations
@@ -189,8 +190,8 @@ namespace AppMeteo
 
             if (ChartTempAndHumidity.Series.Count >= 2)
             {
-                string tempText = Languages.Language.info.ContainsKey("TemperatureTchart2") ? Languages.Language.info["TemperatureTchart2"] : "Temperatura";
-                string humText = Languages.Language.info.ContainsKey("HumidityTchart2") ? Languages.Language.info["HumidityTchart2"] : "Humitat";
+                string tempText = Languages.Language.info.ContainsKey("TemperatureTchart2") ? Languages.Language.info["TemperatureTchart2"] : "TEMPERATURA";
+                string humText = Languages.Language.info.ContainsKey("HumidityTchart2") ? Languages.Language.info["HumidityTchart2"] : "HUMITAT";
 
                 ChartTempAndHumidity.Series[0].Title = tempText;
                 ChartTempAndHumidity.Series[1].Title = humText;
@@ -263,6 +264,11 @@ namespace AppMeteo
             barSeries.ColorEach = false;
             barSeries.Transparency = 70;
 
+            barSeries.BarWidthPercent = 80; // Ancho de las barras como porcentaje del espacio disponible 
+            barSeries.BarStyle = BarStyles.RectGradient; // Estilo rectangular con gradiente
+            barSeries.Pen.Visible = true; // Muestra el borde de las barras 
+            barSeries.Pen.Width = 1; // Grosor del borde
+
             ChartTemp.Panning.Allow = ScrollModes.None;
             ChartTemp.Zoom.Active = false;
 
@@ -300,8 +306,11 @@ namespace AppMeteo
                     iconsForDay[dateKey] = new List<string> { iconUrl };
                 }
 
+                ChartTemp.Axes.Bottom.SetMinMax(0, 0); // Forzamos reset
                 ChartTemp.Axes.Bottom.Automatic = true;
+                ChartTemp.Invalidate();
                 ChartTemp.UpdateLayout();
+
             }
         }
 
@@ -318,7 +327,7 @@ namespace AppMeteo
             scrollBarChart.Visibility = Visibility.Visible;
 
 
-            ChartTemp.Axes.Bottom.Labels.Separation = 20;
+            ChartTemp.Axes.Bottom.Labels.Separation = 90;
 
             //ChartTemp.Axes.Bottom.Increment = Steema.TeeChart.Utils.GetDateTimeStep(Steema.TeeChart.DateTimeSteps.OneHour);
 
@@ -345,6 +354,13 @@ namespace AppMeteo
             }
 
             ChartTemp.Axes.Left.Labels.Visible = false;
+
+            barSeries.ColorEach = false;
+            barSeries.Transparency = 70;
+            barSeries.BarWidthPercent = 20; // Un porcentaje más bajo para las barras por hora
+            barSeries.BarStyle = BarStyles.RectGradient;
+            barSeries.Pen.Visible = true;
+            barSeries.Pen.Width = 1;
 
             if (ChartTemp.Series.Count > 0)
             {
@@ -603,6 +619,7 @@ namespace AppMeteo
 
 
         #region EVENT HANDLERS
+
         // Search button (executed when the search button is clicked)
         private void btnSearch_Click_1(object sender, RoutedEventArgs e)
         {
@@ -638,6 +655,13 @@ namespace AppMeteo
                 GetAllTemperatures(city);
                 GetCurrentTemperature(city);
                 GetTemperatureAndHumidity(city);
+
+                if (ChartTemp.Series.Count > 0 && ChartTemp.Series[0] is Bar barSeries)
+                {
+                    barSeries.BarWidthPercent = 20;
+                    barSeries.BarStyle = BarStyles.RectGradient;
+                    ChartTemp.Invalidate(); // Forzar el redibujado del gráfico
+                }
             }
         }
 
@@ -651,7 +675,13 @@ namespace AppMeteo
             {
                 GetAllTemperaturesByDays(city);
             }
-           
+
+            if (ChartTemp.Series.Count > 0 && ChartTemp.Series[0] is Bar barSeries)
+            {
+                barSeries.BarWidthPercent = 80;
+                barSeries.BarStyle = BarStyles.RectGradient;
+                ChartTemp.Invalidate(); 
+            }
         }
         private void txtSearch_KeyDown(object sender, KeyEventArgs e)
         {

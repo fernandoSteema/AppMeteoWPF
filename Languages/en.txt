@@ -26,6 +26,6 @@ Friday=Friday
 Saturday=Saturday
 Sunday=Sunday
 FORECAST_7_DAYS=FORECAST(7 DAYS)
-Forecast_by_hour=Forecast by hour
+Forecast_by_hour=FORECAST BY HOUR
 btnDays=Days
 btnHours=Hours

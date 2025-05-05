@@ -28,15 +28,13 @@
             </Grid.RowDefinitions>
 
             <!-- 🔤 Selector de idioma -->
-            <StackPanel Orientation="Horizontal" Grid.Column="0" Grid.Row="0" Margin="5" HorizontalAlignment="Left">
-                <Menu HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5">
-                    <MenuItem Header="🌐 Language">
-                        <MenuItem Header="English" Tag="en" IsChecked="True" Name="englishMenuItem" Click="englishMenuItem_Click"/>
-                        <MenuItem Header="Català" Tag="ca" Name="catalanMenuItem" Click="catalanMenuItem_Click"/>
-                        <MenuItem Header="Español" Tag="es" Name="spanishMenuItem" Click="spanishMenuItem_Click"/>
-                    </MenuItem>
-                </Menu>
-            </StackPanel>
+            <Menu Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0">
+                <MenuItem Header="🌐 Language">
+                    <MenuItem Header="English" Tag="en" IsChecked="True" Name="englishMenuItem" Click="englishMenuItem_Click"/>
+                    <MenuItem Header="Català" Tag="ca" Name="catalanMenuItem" Click="catalanMenuItem_Click"/>
+                    <MenuItem Header="Español" Tag="es" Name="spanishMenuItem" Click="spanishMenuItem_Click"/>
+                </MenuItem>
+            </Menu>
 
             <!-- 🔍 Barra de Búsqueda -->
             <Grid Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
