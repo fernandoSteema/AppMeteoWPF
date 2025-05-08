@@ -25,18 +25,6 @@ namespace AppMeteo.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("en.txr")]
-        public string lang {
-            get {
-                return ((string)(this["lang"]));
-            }
-            set {
-                this["lang"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string Valor {
             get {
@@ -44,6 +32,18 @@ namespace AppMeteo.Properties {
             }
             set {
                 this["Valor"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("en.txt")]
+        public string lang {
+            get {
+                return ((string)(this["lang"]));
+            }
+            set {
+                this["lang"] = value;
             }
         }
     }

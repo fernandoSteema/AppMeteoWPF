@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Windows;
@@ -265,6 +266,9 @@ namespace AppMeteo
             barSeries.Transparency = 70;
 
             barSeries.BarWidthPercent = 80; // Ancho de las barras como porcentaje del espacio disponible 
+
+            //barSeries.CustomBarWidth = 13; // por ejemplo
+
             barSeries.BarStyle = BarStyles.RectGradient; // Estilo rectangular con gradiente
             barSeries.Pen.Visible = true; // Muestra el borde de las barras 
             barSeries.Pen.Width = 1; // Grosor del borde
@@ -660,7 +664,7 @@ namespace AppMeteo
                 {
                     barSeries.BarWidthPercent = 20;
                     barSeries.BarStyle = BarStyles.RectGradient;
-                    ChartTemp.Invalidate(); // Forzar el redibujado del gráfico
+                    ChartTemp.Invalidate(); 
                 }
             }
         }
@@ -997,6 +1001,17 @@ namespace AppMeteo
             }
             else
                 ((Bar)(ChartTemp.Series[0])).CustomBarWidth = 0;
+        }
+
+        private void BtnVisitWebsite_Click(object sender, RoutedEventArgs e)
+        {
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = "https://www.weatherapi.com/",
+                UseShellExecute = true
+            };
+
+            Process.Start(psi);
         }
 
         private void cmbDays_SelectionChanged(object sender, SelectionChangedEventArgs e)
