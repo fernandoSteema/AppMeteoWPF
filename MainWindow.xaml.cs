@@ -62,6 +62,29 @@ namespace AppMeteo
             scrollBarChart.Visibility = Visibility.Collapsed;
             ChartTemp.Zoom.Allow = false;
             ChartTempAndHumidity.Zoom.Allow = false;
+
+            #region CONFIGURACION ESTILO DEL CHART
+            ChartTemp.Panel.Gradient.Visible = true;
+            ChartTemp.Panel.Gradient.StartColor = Color.FromArgb(255, 255, 255);
+            ChartTemp.Panel.Gradient.EndColor = Color.FromArgb(250, 252, 255);
+            ChartTemp.Panel.Gradient.Direction = Steema.TeeChart.Drawing.LinearGradientMode.Vertical;
+
+            ChartTemp.Axes.Bottom.Grid.Visible = false;
+            ChartTemp.Axes.Bottom.Labels.Font.Size = 8;
+            ChartTemp.Axes.Bottom.Labels.Font.Bold = true;
+            ChartTemp.Axes.Bottom.Labels.Font.Color = Color.FromArgb(80, 102, 120);
+            #endregion
+
+            #region CONFIGURACION DEL TITULO DEL CHART
+            ChartTemp.Header.Font.Size = 14;
+            ChartTemp.Header.Font.Bold = true;
+            ChartTemp.Header.Font.Color = Color.FromArgb(80, 102, 120);
+            ChartTemp.Header.Font.Name = "Segoe UI";
+            ChartTemp.Header.Alignment = (Steema.TeeChart.Drawing.StringAlignment)TextAlignment.Right;
+            ChartTemp.Header.Transparent = true;
+            #endregion
+
+
         }
 
 
@@ -262,19 +285,17 @@ namespace AppMeteo
             daysWithDates.Clear();
             verticalLinePositions.Clear();
 
+            #region CONFIGURACION BAR SERIES
             barSeries.ColorEach = false;
-            barSeries.Transparency = 70;
-
-            barSeries.BarWidthPercent = 80; // Ancho de las barras como porcentaje del espacio disponible 
-
-            //barSeries.CustomBarWidth = 13; // por ejemplo
-
-            barSeries.BarStyle = BarStyles.RectGradient; // Estilo rectangular con gradiente
-            barSeries.Pen.Visible = true; // Muestra el borde de las barras 
-            barSeries.Pen.Width = 1; // Grosor del borde
-
-            ChartTemp.Panning.Allow = ScrollModes.None;
-            ChartTemp.Zoom.Active = false;
+            barSeries.Color = Color.FromArgb(52, 152, 219); // Color principal de las barras
+            barSeries.Gradient.Visible = true;
+            barSeries.Gradient.StartColor = Color.LightBlue;
+            barSeries.Gradient.EndColor = Color.FromArgb(136, 193, 231);
+            barSeries.Gradient.Direction = Steema.TeeChart.Drawing.LinearGradientMode.ForwardDiagonal;
+            barSeries.Transparency = 20; // Reducimos la transparencia para un aspecto más sólido
+            barSeries.BarWidthPercent = 60; // Reducimos el ancho para un aspecto más elegante
+            barSeries.BarStyle = BarStyles.RectGradient;
+            #endregion
 
             // Elimina anotaciones anteriores
             for (int i = ChartTemp.Tools.Count - 1; i >= 0; i--)
@@ -314,10 +335,10 @@ namespace AppMeteo
                 ChartTemp.Axes.Bottom.Automatic = true;
                 ChartTemp.Invalidate();
                 ChartTemp.UpdateLayout();
-
             }
-        }
 
+        }
+        
 
         /// <summary>
         /// Retrieves the hourly weather evolution for the specified city and displays it in a bar chart.
@@ -329,6 +350,10 @@ namespace AppMeteo
             scrollBarChart.Visibility = Visibility.Visible;
             cmbDays.Visibility = Visibility.Visible;
             scrollBarChart.Visibility = Visibility.Visible;
+
+            #region CONFIGURACION ESTILO DEL CHART
+
+            #endregion
 
 
             ChartTemp.Axes.Bottom.Labels.Separation = 90;
@@ -934,7 +959,7 @@ namespace AppMeteo
                 scrollBarChart.Value = ChartTemp.Page.Current - 1;
         }
 
-        private void scrollBarGrafico_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
+        private void scrollBarChart_Scroll(object sender, System.Windows.Controls.Primitives.ScrollEventArgs e)
         {
             ChartTemp.Axes.Bottom.Automatic = false;
 
@@ -1014,6 +1039,68 @@ namespace AppMeteo
             Process.Start(psi);
         }
 
+        //private void scrollBarChart_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        //{
+        //    if (ChartTemp.Series.Count == 0 || ChartTemp.Series[0].Count == 0)
+        //        return;
+
+        //    // Obtener el rango global
+        //    double globalMinX = ChartTemp.Series[0].MinXValue();
+        //    double globalMaxX = ChartTemp.Series[0].MaxXValue();
+        //    double totalRange = globalMaxX - globalMinX;
+
+        //    // Calcular nuevo rango visible en base al scrollbar
+        //    double visibleRange = totalRange / 7; // por ejemplo, mostrar un día de 7
+        //    double newMin = globalMinX + scrollBarChart.Value * (totalRange - visibleRange) / scrollBarChart.Maximum;
+        //    double newMax = newMin + visibleRange;
+
+        //    if (newMax > globalMaxX)
+        //    {
+        //        newMax = globalMaxX;
+        //        newMin = newMax - visibleRange;
+        //    }
+
+        //    if (newMin < globalMinX)
+        //    {
+        //        newMin = globalMinX;
+        //        newMax = newMin + visibleRange;
+        //    }
+
+        //    // Aplicar el nuevo rango al gráfico
+        //    ChartTemp.Axes.Bottom.SetMinMax(newMin, newMax);
+        //    ChartTemp.UpdateLayout();
+        //    ChartTemp.Invalidate();
+        //    UpdateAnnotations();
+
+        //    // Buscar el día que corresponde al nuevo rango mínimo
+        //    foreach (var kvp in rankDays)
+        //    {
+        //        double minDay = kvp.Value.Item1;
+        //        double maxDay = kvp.Value.Item2;
+
+        //        if (newMin >= minDay && newMin <= maxDay)
+        //        {
+        //            if (DateTime.TryParseExact(kvp.Key, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
+        //            {
+        //                string dayName = CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek);
+        //                dayName = char.ToUpper(dayName[0]) + dayName.Substring(1); // Capitalize
+
+        //                string displayText = $"{dayName} ({date:dd/MM})";
+
+        //                int index = cmbDays.Items.IndexOf(displayText);
+
+        //                if (index != -1 && cmbDays.SelectedIndex != index)
+        //                {
+        //                    cmbDays.SelectedIndex = index;
+        //                }
+        //            }
+
+        //            break;
+        //        }
+        //    }
+        //}
+
+
         private void cmbDays_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (cmbDays.SelectedItem == null) return;
@@ -1044,6 +1131,7 @@ namespace AppMeteo
                         {
                             scrollBarChart.Value = sliderValue;
                         }
+
                         ChartTemp.UpdateLayout();
                         ChartTemp.Invalidate();
                         UpdateAnnotations();
