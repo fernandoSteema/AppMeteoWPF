@@ -11,8 +11,10 @@ using System.Windows.Media.Imaging;
 using AppMeteo.Controllers;
 using MeteoApp.MODELS;
 using Steema.TeeChart;
+using Steema.TeeChart.Drawing;
 using Steema.TeeChart.Styles;
 using Steema.TeeChart.Tools;
+using Steema.TeeChart.WPF.Drawing;
 using Annotation = Steema.TeeChart.Tools.Annotation;
 using Color = System.Drawing.Color;
 
@@ -313,7 +315,8 @@ namespace AppMeteo
 
             if (allTemperatures != null && allTemperatures.forecastday.Count > 0)
             {
-                ChartTemp.Header.Text = "FORECAST 7 DAYS";
+                string headerTxt = Languages.Language.info.ContainsKey("FORECAST_7_DAYS") ? Languages.Language.info["FORECAST_7_DAYS"] : "FORECAST(7 DAYS)";
+                ChartTemp.Header.Text = headerTxt;
 
                 foreach (Forecastday day in allTemperatures.forecastday)
                 {
@@ -350,10 +353,6 @@ namespace AppMeteo
             scrollBarChart.Visibility = Visibility.Visible;
             cmbDays.Visibility = Visibility.Visible;
             scrollBarChart.Visibility = Visibility.Visible;
-
-            #region CONFIGURACION ESTILO DEL CHART
-
-            #endregion
 
 
             ChartTemp.Axes.Bottom.Labels.Separation = 90;
@@ -398,7 +397,7 @@ namespace AppMeteo
                 daysWithDates.Clear();
             }
 
-            string headerTxt = Languages.Language.info.ContainsKey("Forecast_by_hour") ? Languages.Language.info["Forecast_by_hour"] : "Previsió per hores";
+            string headerTxt = Languages.Language.info.ContainsKey("Forecast_by_hour") ? Languages.Language.info["Forecast_by_hour"] : "FORECAST BY HOUR";
             ChartTemp.Header.Text = headerTxt;
 
 
@@ -507,6 +506,8 @@ namespace AppMeteo
             if (ChartTempAndHumidity?.Chart == null)
                 return;
 
+            SetupChartAppearance();
+
             ChartTempAndHumidity.Series.Clear();
 
             for (int i = ChartTempAndHumidity.Tools.Count - 1; i >= 0; i--)
@@ -514,40 +515,16 @@ namespace AppMeteo
                 if (ChartTempAndHumidity.Tools[i] is NearestPoint)
                     ChartTempAndHumidity.Tools.RemoveAt(i);
             }
+
             toolNPHumidity = null;
             toolNPTemp = null;
 
-            ChartTempAndHumidity.Legend.Alignment = LegendAlignments.Bottom;
-            Line lineTemperature = new Line(ChartTempAndHumidity.Chart)
-            {
-                Title = "Temperature",
-                Smoothed = false,
-                Stairs = false,
-                VertAxis = VerticalAxis.Left
-            };
 
-            lineTemperature.Pointer.Visible = true;
-            lineTemperature.Pointer.Style = PointerStyles.Circle;
-            lineTemperature.Pointer.HorizSize = 4;
-            lineTemperature.Pointer.VertSize = 4;
-            lineTemperature.LinePen.Width = 4;
-
-
-            Line lineHumidity = new Line(ChartTempAndHumidity.Chart)
-            {
-                Title = "Humidity",
-                Smoothed = false,
-                Stairs = false,
-                VertAxis = VerticalAxis.Right
-            };
-
-            lineHumidity.Pointer.Visible = true;
-            lineHumidity.Pointer.Style = PointerStyles.Rectangle;
-            lineHumidity.Pointer.HorizSize = 4;
-            lineHumidity.Pointer.VertSize = 4;
-            lineHumidity.LinePen.Width = 4;
+            Line lineTemperature = CreateTemperatureSeries();
+            Line lineHumidity = CreateHumiditySeries();
 
             Color tempColor = lineTemperature.Color;
+
             lineTemperature.Color = lineHumidity.Color;
             lineHumidity.Color = tempColor;
 
@@ -595,11 +572,7 @@ namespace AppMeteo
 
             allTemperatures = await weatherController.GetEvolutionOfHumidityAndTemperatureByCity(city);
 
-            annotation = new Steema.TeeChart.Tools.Annotation(ChartTempAndHumidity.Chart);
-            vertAxis = ChartTempAndHumidity.Axes.Left;
-            horizAxis = ChartTempAndHumidity.Axes.Bottom;
-
-            ChartTempAndHumidity.MouseMove += ChartTempAndHumidity_MouseMove;
+            ConfigureAnottation();
 
             if (allTemperatures != null)
             {
@@ -623,27 +596,146 @@ namespace AppMeteo
                     }
                 }
             }
-
-            //Configurar formato para mostra la hora
-            ChartTempAndHumidity.Axes.Bottom.Labels.Style = AxisLabelStyle.PointValue;
-            ChartTempAndHumidity.Axes.Bottom.Labels.DateTimeFormat = "HH:mm";
-            ChartTempAndHumidity.Axes.Bottom.Labels.Font.Size = 10;
-            ChartTempAndHumidity.Axes.Bottom.Labels.Angle = 45;
-
-
-            // Configurar ejes
-            ChartTempAndHumidity.Axes.Left.SetMinMax(0, 20);
-            ChartTempAndHumidity.Axes.Left.Increment = 10;
-            ChartTempAndHumidity.Axes.Left.Automatic = false;
-
-            ChartTempAndHumidity.Axes.Right.SetMinMax(0, 100);
-            ChartTempAndHumidity.Axes.Right.Increment = 50;
-            ChartTempAndHumidity.Axes.Right.Automatic = false;
+            ConfigureAxes();
 
             // Forzar la actualización del gráfico
             ChartTempAndHumidity.Invalidate();
         }
 
+   
+
+        private void ConfigureAxes()
+        {
+            // Eje X (Horas)
+            ChartTempAndHumidity.Axes.Bottom.Labels.Style = AxisLabelStyle.PointValue;
+            ChartTempAndHumidity.Axes.Bottom.Labels.DateTimeFormat = "HH:mm";
+            ChartTempAndHumidity.Axes.Bottom.Labels.Font.Size = 9;
+            ChartTempAndHumidity.Axes.Bottom.Labels.Font.Bold = true;
+            ChartTempAndHumidity.Axes.Bottom.Labels.Angle = 45;
+            ChartTempAndHumidity.Axes.Bottom.Title.Text = "Hora";
+            ChartTempAndHumidity.Axes.Bottom.Title.Font.Size = 10;
+            ChartTempAndHumidity.Axes.Bottom.Title.Font.Bold = true;
+            ChartTempAndHumidity.Axes.Bottom.Grid.Color = Color.FromArgb(230, 230, 230);
+
+
+            // Configurar ejes
+            ChartTempAndHumidity.Axes.Left.SetMinMax(0, 20);
+            ChartTempAndHumidity.Axes.Left.Increment = 5;
+            ChartTempAndHumidity.Axes.Left.Automatic = false;
+            ChartTempAndHumidity.Axes.Left.Title.Text = "Temperatura (°C)";
+            ChartTempAndHumidity.Axes.Left.Title.Font.Size = 10;
+            ChartTempAndHumidity.Axes.Left.Title.Font.Bold = true;
+
+            ChartTempAndHumidity.Axes.Right.SetMinMax(0, 100);
+            ChartTempAndHumidity.Axes.Right.Increment = 50;
+            ChartTempAndHumidity.Axes.Right.Automatic = false;
+            ChartTempAndHumidity.Axes.Right.Title.Text = "Humedad (%)";
+            ChartTempAndHumidity.Axes.Right.Title.Font.Size = 10;
+            ChartTempAndHumidity.Axes.Right.Title.Font.Bold = true;
+        }
+
+        private void ConfigureAnottation()
+        {
+            annotation = new Steema.TeeChart.Tools.Annotation(ChartTempAndHumidity.Chart);
+
+            annotation.Shape.Font.Size = 9;
+            annotation.Shape.Font.Bold = true;
+            annotation.Shape.Transparent = true;
+            annotation.Shape.Shadow.Visible = true;
+            annotation.Shape.Shadow.Transparency = 70;
+
+            vertAxis = ChartTempAndHumidity.Axes.Left;
+            horizAxis = ChartTempAndHumidity.Axes.Bottom;
+
+            ChartTempAndHumidity.MouseMove += ChartTempAndHumidity_MouseMove;
+        }
+
+        private Line CreateTemperatureSeries()
+        {
+            Line lineTemperature = new Line(ChartTempAndHumidity.Chart)
+            {
+                Title = "Temperature",
+                Smoothed = false,
+                Stairs = false,
+                VertAxis = VerticalAxis.Left
+            };
+
+            lineTemperature.Pointer.Visible = true;
+            lineTemperature.Pointer.Style = PointerStyles.Circle;
+            lineTemperature.Pointer.HorizSize = 6;
+            lineTemperature.Pointer.VertSize = 6;
+            lineTemperature.Pointer.Gradient.Visible = true;
+            lineTemperature.Pointer.Brush.Gradient.StartColor = Color.White;
+            lineTemperature.Pointer.Brush.Gradient.EndColor = Color.FromArgb(220, 53, 69);
+            lineTemperature.Pointer.Brush.Gradient.Direction = Steema.TeeChart.Drawing.LinearGradientMode.Vertical;
+
+            lineTemperature.LinePen.Width = 3;
+            lineTemperature.LinePen.EndCap = (Steema.TeeChart.Drawing.LineCap)System.Drawing.Drawing2D.LineCap.Round;
+
+            // Añadir marcas en los puntos
+            lineTemperature.Marks.Visible = false;
+            lineTemperature.Marks.Arrow.Visible = false;
+            lineTemperature.Marks.Transparent = true;
+            return lineTemperature;
+        }
+
+        private Line CreateHumiditySeries()
+        {
+            Line lineHumidity = new Line(ChartTempAndHumidity.Chart)
+            {
+                Title = "Humidity",
+                Smoothed = false,
+                Stairs = false,
+                VertAxis = VerticalAxis.Right
+            };
+
+            lineHumidity.Pointer.Visible = true;
+            lineHumidity.Pointer.Style = PointerStyles.Rectangle;
+            lineHumidity.Pointer.HorizSize = 6;
+            lineHumidity.Pointer.VertSize = 6;
+            lineHumidity.Pointer.Brush.Gradient.Visible = true;
+            lineHumidity.Pointer.Brush.Gradient.StartColor = Color.White;
+            lineHumidity.Pointer.Brush.Gradient.EndColor = Color.FromArgb(0, 123, 255);
+            lineHumidity.Pointer.Brush.Gradient.Direction = (Steema.TeeChart.Drawing.LinearGradientMode)GradientDirection.Radial;
+
+            // Configurar apariencia de línea
+            lineHumidity.LinePen.Width = 3;
+            lineHumidity.LinePen.Style = Steema.TeeChart.Drawing.DashStyle.Dash;
+            lineHumidity.LinePen.EndCap = (Steema.TeeChart.Drawing.LineCap)System.Drawing.Drawing2D.LineCap.Round;
+
+            // Añadir marcas en los puntos
+            lineHumidity.Marks.Visible = false;
+            lineHumidity.Marks.Arrow.Visible = false;
+            lineHumidity.Marks.Transparent = true;
+            return lineHumidity;
+        }
+
+        private void SetupChartAppearance()
+        {
+            ChartTempAndHumidity.Legend.Alignment = LegendAlignments.Bottom;
+            ChartTempAndHumidity.Legend.Font.Size = 10;
+            ChartTempAndHumidity.Legend.Font.Bold = true;
+
+            // Panel y fondo
+            ChartTempAndHumidity.Panel.Gradient.Visible = true;
+            ChartTempAndHumidity.Panel.Gradient.StartColor = Color.White;
+            ChartTempAndHumidity.Panel.Gradient.EndColor = Color.FromArgb(245, 245, 245);
+            ChartTempAndHumidity.Panel.Gradient.Direction = Steema.TeeChart.Drawing.LinearGradientMode.Vertical;
+            ChartTempAndHumidity.Panel.Bevel.Inner = BevelStyles.None;
+            ChartTempAndHumidity.Panel.Bevel.Outer = BevelStyles.None;
+            ChartTempAndHumidity.Panel.BorderRound = 10;
+
+            // Títulos
+            ChartTempAndHumidity.Header.Text = "EVOLUCIÓN DIARIA";
+            ChartTempAndHumidity.Header.Font.Size = 14;
+            ChartTempAndHumidity.Header.Font.Bold = true;
+            ChartTempAndHumidity.Header.Font.Color = Color.FromArgb(50, 50, 50);
+
+            ChartTempAndHumidity.SubHeader.Text = "Temperatura (°C) / Humedad relativa (%)";
+            ChartTempAndHumidity.SubHeader.Font.Size = 10;
+            ChartTempAndHumidity.SubHeader.Font.Color = Color.FromArgb(100, 100, 100);
+
+        }
         #endregion
 
 
@@ -712,7 +804,7 @@ namespace AppMeteo
                 ChartTemp.Invalidate(); 
             }
         }
-        private void txtSearch_KeyDown(object sender, KeyEventArgs e)
+        private void txtSearch_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -901,7 +993,7 @@ namespace AppMeteo
 
 
         #region Chart Interaction and Visualization
-        private void ChartTempAndHumidity_MouseMove(object? sender, MouseEventArgs e)
+        private void ChartTempAndHumidity_MouseMove(object? sender, System.Windows.Input.MouseEventArgs e)
         {
             Point position = e.GetPosition(ChartTempAndHumidity);
 
@@ -950,6 +1042,21 @@ namespace AppMeteo
                 txtSearch.Text = selectedItem.Content.ToString();
                 txtSearch.Focus();
                 txtSearch.CaretIndex = txtSearch.Text.Length;
+            }
+
+            string city = txtSearch.Text.Trim();
+
+            if (!eventAdded)
+            {
+                ChartTemp.AfterDraw += ChartTemp_AfterDraw1;
+                eventAdded = true;
+            }
+
+            if (!string.IsNullOrEmpty(city))
+            {
+                GetCurrentTemperature(city);
+                GetAllTemperaturesByDays(city);
+                GetTemperatureAndHumidity(city);
             }
         }
 

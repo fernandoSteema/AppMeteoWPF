@@ -103,7 +103,7 @@
             <Border Grid.Column="0" Background="White" CornerRadius="12" 
                     Margin="0,0,20,0" Effect="{DynamicResource ShadowEffect}">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="📍 Ciudades recientes" 
+                    <TextBlock Name="txtRecentCities" DockPanel.Dock="Top" Text="📍Recent cities" 
                                FontWeight="SemiBold" FontSize="16" Margin="15,15,15,5"/>
                     <ListBox Name="lstCities" BorderThickness="0" Margin="0,10,0,0"
                              SelectionChanged="lstCities_SelectionChanged">
@@ -174,21 +174,21 @@
                     Effect="{DynamicResource ShadowEffect}">
 
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="ℹ️ Información" 
+                    <TextBlock Name="txtInformation" DockPanel.Dock="Top" Text="ℹ️ Information" 
                                FontWeight="SemiBold" FontSize="16" Margin="15"/>
 
                     <StackPanel DockPanel.Dock="Top">
                         <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="15,0,15,15" Height="Auto">
-                            <TextBlock TextWrapping="Wrap" FontSize="14" Foreground="#5D6D7E" LineHeight="24">
-                                Escribe el nombre de una ciudad para obtener su previsión meteorológica.
-                                Puedes cambiar el idioma desde el menú superior.
-                                Consulta ciudades recientes en la lista lateral.
+                            <TextBlock TextWrapping="Wrap" FontSize="14" Foreground="#5D6D7E" LineHeight="24" Name="txtBlockInformation">
+                                Type the name of a city to get its weather forecast.
+                                You can change the language from the top menu.
+                                See recent cities in the side list.
                             </TextBlock>
                         </ScrollViewer>
 
                         <!-- Botón de ir a la web debajo del texto -->
                         <Button Content="🌐 Weather API Web" Width="200" 
-                                Margin="15,0,15,15" HorizontalAlignment="Left"
+                                Margin="15,0,15,15" HorizontalAlignment="Center"
                                 Click="BtnVisitWebsite_Click"/>
                     </StackPanel>
                 </DockPanel>
@@ -200,7 +200,7 @@
                 Effect="{DynamicResource ShadowEffect}">
 
             <TabControl>
-                <TabItem Header="Temperature">
+                <TabItem x:Name="tabTemperature" Header="Temperature">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
@@ -228,7 +228,7 @@
                     </Grid>
                 </TabItem>
 
-                <TabItem Header="Temperatura/Humedad">
+                <TabItem x:Name="tabTemperatureAndHumidity" Header="Temperature/Humidity">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
