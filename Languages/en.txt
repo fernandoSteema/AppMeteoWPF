@@ -1,4 +1,4 @@
-lblSearch=The weather in...
+lblSearch=The weather in... 
 lblSearch2=The weather in
 lblProvincia=province
 lblWiind=WIND
@@ -10,7 +10,7 @@ lblPrecipitations=PROB.OF PRECIPITATION
 lblPresure=PRESSURE
 Temperature=Temperature
 Humidity=Humidity
-EVOLUTION_OF_DAY=Evolution of day
+EVOLUTION_OF_DAY=EVOLUTION OF THE DAY
 TEMP_HUMIDITY=Temperature / Relative humidity
 TemperatureTchart2=Temperature (ºC)
 HumidityTchart2=Humidity (%)

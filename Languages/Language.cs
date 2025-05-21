@@ -36,7 +36,8 @@ namespace AppMeteo.Languages
 
             if (Application.Current.MainWindow is MainWindow mainWindow)
             {
-                
+                mainWindow.lblSearch.Text = Language.info.ContainsKey("lblSearch") ? Language.info["lblSearch"] : "The weather in... ";
+
                 mainWindow.UpdateChartLanguage();
 
                 if (mainWindow.btnDays != null)
@@ -62,6 +63,8 @@ namespace AppMeteo.Languages
 
                 mainWindow.UpdateAnnotations();
                 
+                mainWindow.ConfigureAxes();
+
                 mainWindow.UpdateAndLoadForecastDays();
 
                 if (mainWindow.btnDayActivate)

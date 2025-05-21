@@ -1,4 +1,4 @@
-lblSearch=El temps en...
+lblSearch=El temps en... 
 lblSearch2=El temps en
 lblProvincia=província
 lblWiind=VENT
@@ -10,7 +10,7 @@ lblPrecipitations=PROB. DE PRECIPITACIÓ
 lblPresure=PRESSIÓ
 Temperature=Temperatura
 Humidity=Humitat
-EVOLUTION_OF_DAY=Evolució del dia
+EVOLUTION_OF_DAY=EVOLUCIÓ DEL DIA
 TEMP_HUMIDITY=Temperatura / Humitat relativa
 TemperatureTchart2=Temperatura (ºC)
 HumidityTchart2=Humitat (%)

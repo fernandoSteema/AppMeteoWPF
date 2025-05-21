@@ -62,8 +62,12 @@ namespace AppMeteo
             AppMeteo.Languages.Language.ChangeLenguage(Properties.Settings.Default.lang);
             cmbDays.Visibility = Visibility.Collapsed;
             scrollBarChart.Visibility = Visibility.Collapsed;
+
             ChartTemp.Zoom.Allow = false;
             ChartTempAndHumidity.Zoom.Allow = false;
+
+            ChartTemp.Panning.Allow = ScrollModes.None;
+            ChartTempAndHumidity.Panning.Allow = ScrollModes.None;
 
             #region CONFIGURACION ESTILO DEL CHART
             ChartTemp.Panel.Gradient.Visible = true;
@@ -84,6 +88,14 @@ namespace AppMeteo
             ChartTemp.Header.Font.Name = "Segoe UI";
             ChartTemp.Header.Alignment = (Steema.TeeChart.Drawing.StringAlignment)TextAlignment.Right;
             ChartTemp.Header.Transparent = true;
+
+            ChartTempAndHumidity.Header.Font.Size = 14;
+            ChartTempAndHumidity.Header.Font.Bold = true;
+            ChartTempAndHumidity.Header.Font.Color = Color.FromArgb(80, 102, 120);
+            ChartTempAndHumidity.Header.Font.Name = "Segoe UI";
+            ChartTempAndHumidity.Header.Alignment = (Steema.TeeChart.Drawing.StringAlignment)TextAlignment.Right;
+            ChartTempAndHumidity.Header.Transparent = true;
+
             #endregion
 
 
@@ -159,7 +171,7 @@ namespace AppMeteo
                 return;
             }
 
-            int selectedIndex = cmbDays.SelectedIndex; // Save current selection
+            int selectedIndex = cmbDays.SelectedIndex; 
             string selectedDay = (cmbDays.SelectedItem != null) ? cmbDays.SelectedItem.ToString() : "";
 
             cmbDays.Items.Clear();
@@ -169,7 +181,6 @@ namespace AppMeteo
                 DateTime date = DateTime.Parse(allTemperatures.forecastday[i].date);
                 string dayOfTheWeek = date.ToString("dddd");
 
-                // Translate if exists in the language dictionary
                 if (Languages.Language.info.ContainsKey(dayOfTheWeek))
                 {
                     dayOfTheWeek = Languages.Language.info[dayOfTheWeek];
@@ -206,18 +217,16 @@ namespace AppMeteo
             string headerTxt = Languages.Language.info.ContainsKey("Forecast_by_hour") ? Languages.Language.info["Forecast_by_hour"] : "PREVICIÓ PER HORES";
             ChartTemp.Header.Text = headerTxt;
 
-            // Get translations
             string evolutionText = Languages.Language.info.ContainsKey("EVOLUTION_OF_DAY") ? Languages.Language.info["EVOLUTION_OF_DAY"] : "EVOLUCIÓ DEL DIA";
             string tempHumText = Languages.Language.info.ContainsKey("TEMP_HUMIDITY") ? Languages.Language.info["TEMP_HUMIDITY"] : "Temperatura / Humitat relativa";
 
-            // Update chart headers without modifying the data
             ChartTempAndHumidity.Header.Text = $"{evolutionText}: {allTemperatures.forecastday[0].date}";
             ChartTempAndHumidity.SubHeader.Text = tempHumText;
 
             if (ChartTempAndHumidity.Series.Count >= 2)
             {
-                string tempText = Languages.Language.info.ContainsKey("TemperatureTchart2") ? Languages.Language.info["TemperatureTchart2"] : "TEMPERATURA";
-                string humText = Languages.Language.info.ContainsKey("HumidityTchart2") ? Languages.Language.info["HumidityTchart2"] : "HUMITAT";
+                string tempText = Languages.Language.info.ContainsKey("TemperatureTchart2") ? Languages.Language.info["TemperatureTchart2"] : "Temperature (ºC)";
+                string humText = Languages.Language.info.ContainsKey("HumidityTchart2") ? Languages.Language.info["HumidityTchart2"] : "Humidity (%)";
 
                 ChartTempAndHumidity.Series[0].Title = tempText;
                 ChartTempAndHumidity.Series[1].Title = humText;
@@ -385,7 +394,7 @@ namespace AppMeteo
 
             barSeries.ColorEach = false;
             barSeries.Transparency = 70;
-            barSeries.BarWidthPercent = 20; // Un porcentaje más bajo para las barras por hora
+            barSeries.BarWidthPercent = 20;
             barSeries.BarStyle = BarStyles.RectGradient;
             barSeries.Pen.Visible = true;
             barSeries.Pen.Width = 1;
@@ -531,7 +540,6 @@ namespace AppMeteo
             ChartTempAndHumidity.Series.Add(lineTemperature);
             ChartTempAndHumidity.Series.Add(lineHumidity);
 
-            // Crear herramientas NearestPoint (una para cada serie)
             if (toolNPHumidity == null)
             {
                 toolNPHumidity = new NearestPoint(ChartTempAndHumidity.Chart)
@@ -578,8 +586,11 @@ namespace AppMeteo
             {
                 foreach (Forecastday day in allTemperatures.forecastday)
                 {
-                    ChartTempAndHumidity.Header.Text = "EVOLUTION OF THE DAY";
-                    ChartTempAndHumidity.SubHeader.Text = "Temperatura / Humitat relativa";
+                    string evolutionText = Languages.Language.info.ContainsKey("EVOLUTION_OF_DAY") ? Languages.Language.info["EVOLUTION_OF_DAY"] : "EVOLUTION OF THE DAY";
+                    string tempHumText = Languages.Language.info.ContainsKey("TEMP_HUMIDITY") ? Languages.Language.info["TEMP_HUMIDITY"] : "Temperatura / Humitat relativa";
+
+                    ChartTempAndHumidity.Header.Text = $"{evolutionText}: {allTemperatures.forecastday[0].date}";
+                    ChartTempAndHumidity.SubHeader.Text = tempHumText;
 
                     foreach (var hour in day.hour)
                     {
@@ -587,6 +598,10 @@ namespace AppMeteo
                         if (dateHour.Hour >= 0 && dateHour.Hour <= 9 && (dateHour.Minute == 0 || dateHour.Minute == 30))
                         {
                             double hourValue = dateHour.ToOADate();
+
+                            lineTemperature.XValues.DateTime = true;
+                            lineHumidity.XValues.DateTime = true;
+
                             lineTemperature.Add(hourValue, hour.temp_c);
                             lineHumidity.Add(hourValue, hour.humidity);
 
@@ -596,42 +611,54 @@ namespace AppMeteo
                     }
                 }
             }
-            ConfigureAxes();
 
-            // Forzar la actualización del gráfico
+            ConfigureAxes();
+            
+            ChartTempAndHumidity.Axes.Bottom.SetMinMax(0, 0); 
+            ChartTempAndHumidity.Axes.Bottom.Automatic = true;
+            ChartTempAndHumidity.Invalidate();
+            ChartTempAndHumidity.UpdateLayout();
             ChartTempAndHumidity.Invalidate();
         }
 
-   
-
-        private void ConfigureAxes()
+        public void ConfigureAxes()
         {
-            // Eje X (Horas)
-            ChartTempAndHumidity.Axes.Bottom.Labels.Style = AxisLabelStyle.PointValue;
+            
+            ChartTempAndHumidity.Axes.Bottom.Labels.Style = AxisLabelStyle.Value;
+            ChartTempAndHumidity.Axes.Bottom.Labels.ValueFormat = "HH:mm";
             ChartTempAndHumidity.Axes.Bottom.Labels.DateTimeFormat = "HH:mm";
             ChartTempAndHumidity.Axes.Bottom.Labels.Font.Size = 9;
             ChartTempAndHumidity.Axes.Bottom.Labels.Font.Bold = true;
             ChartTempAndHumidity.Axes.Bottom.Labels.Angle = 45;
-            ChartTempAndHumidity.Axes.Bottom.Title.Text = "Hora";
             ChartTempAndHumidity.Axes.Bottom.Title.Font.Size = 10;
             ChartTempAndHumidity.Axes.Bottom.Title.Font.Bold = true;
             ChartTempAndHumidity.Axes.Bottom.Grid.Color = Color.FromArgb(230, 230, 230);
+            
+            ChartTempAndHumidity.Axes.Bottom.Increment = 1.0 / 24.0;  // Increment by 1 hour
 
-
-            // Configurar ejes
             ChartTempAndHumidity.Axes.Left.SetMinMax(0, 20);
             ChartTempAndHumidity.Axes.Left.Increment = 5;
             ChartTempAndHumidity.Axes.Left.Automatic = false;
-            ChartTempAndHumidity.Axes.Left.Title.Text = "Temperatura (°C)";
+            string tempText = Languages.Language.info.ContainsKey("TemperatureTchart2") ? Languages.Language.info["TemperatureTchart2"] : "Temperature (ºC)";
+            ChartTempAndHumidity.Axes.Left.Title.Text = tempText;
             ChartTempAndHumidity.Axes.Left.Title.Font.Size = 10;
             ChartTempAndHumidity.Axes.Left.Title.Font.Bold = true;
 
             ChartTempAndHumidity.Axes.Right.SetMinMax(0, 100);
             ChartTempAndHumidity.Axes.Right.Increment = 50;
             ChartTempAndHumidity.Axes.Right.Automatic = false;
-            ChartTempAndHumidity.Axes.Right.Title.Text = "Humedad (%)";
+            string humText = Languages.Language.info.ContainsKey("HumidityTchart2") ? Languages.Language.info["HumidityTchart2"] : "Humidity (%)";
+            ChartTempAndHumidity.Axes.Right.Title.Text = humText;
             ChartTempAndHumidity.Axes.Right.Title.Font.Size = 10;
             ChartTempAndHumidity.Axes.Right.Title.Font.Bold = true;
+
+          
+            ChartTempAndHumidity.Axes.Bottom.Labels.ExactDateTime = true;
+
+            ChartTempAndHumidity.Axes.Bottom.Maximum = 10;
+
+            ChartTempAndHumidity.Invalidate();
+            ChartTempAndHumidity.UpdateLayout();
         }
 
         private void ConfigureAnottation()
@@ -639,7 +666,8 @@ namespace AppMeteo
             annotation = new Steema.TeeChart.Tools.Annotation(ChartTempAndHumidity.Chart);
 
             annotation.Shape.Font.Size = 9;
-            annotation.Shape.Font.Bold = true;
+            annotation.Shape.Font.Bold = false;
+            annotation.Shape.Font.Name = "Segoe UI";
             annotation.Shape.Transparent = true;
             annotation.Shape.Shadow.Visible = true;
             annotation.Shape.Shadow.Transparency = 70;
@@ -652,9 +680,10 @@ namespace AppMeteo
 
         private Line CreateTemperatureSeries()
         {
+            string titleTemp = Languages.Language.info.ContainsKey("TemperatureTchart2") ? Languages.Language.info["TemperatureTchart2"] : "Temperature (ºC)";
             Line lineTemperature = new Line(ChartTempAndHumidity.Chart)
             {
-                Title = "Temperature",
+                Title = titleTemp,
                 Smoothed = false,
                 Stairs = false,
                 VertAxis = VerticalAxis.Left
@@ -681,9 +710,10 @@ namespace AppMeteo
 
         private Line CreateHumiditySeries()
         {
+            string titleHum = Languages.Language.info.ContainsKey("HumidityTchart2") ? Languages.Language.info["HumidityTchart2"] : "Humidity (%)";
             Line lineHumidity = new Line(ChartTempAndHumidity.Chart)
             {
-                Title = "Humidity",
+                Title = titleHum,
                 Smoothed = false,
                 Stairs = false,
                 VertAxis = VerticalAxis.Right
@@ -725,13 +755,8 @@ namespace AppMeteo
             ChartTempAndHumidity.Panel.Bevel.Outer = BevelStyles.None;
             ChartTempAndHumidity.Panel.BorderRound = 10;
 
-            // Títulos
-            ChartTempAndHumidity.Header.Text = "EVOLUCIÓN DIARIA";
-            ChartTempAndHumidity.Header.Font.Size = 14;
-            ChartTempAndHumidity.Header.Font.Bold = true;
-            ChartTempAndHumidity.Header.Font.Color = Color.FromArgb(50, 50, 50);
 
-            ChartTempAndHumidity.SubHeader.Text = "Temperatura (°C) / Humedad relativa (%)";
+            //ChartTempAndHumidity.SubHeader.Text = "Temperatura (°C) / Humedad relativa (%)";
             ChartTempAndHumidity.SubHeader.Font.Size = 10;
             ChartTempAndHumidity.SubHeader.Font.Color = Color.FromArgb(100, 100, 100);
 
@@ -1017,6 +1042,7 @@ namespace AppMeteo
 
             string tempText = Languages.Language.info.ContainsKey("Temperature") ? Languages.Language.info["Temperature"] : "Temperature";
             string humText = Languages.Language.info.ContainsKey("Humidity") ? Languages.Language.info["Humidity"] : "Humidity";
+
 
             int indexTemp = toolNPTemp.Point;
             int indexHum = toolNPHumidity.Point;
