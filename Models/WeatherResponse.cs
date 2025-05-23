@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using SkiaSharp;
+using Steema.TeeChart.Functions;
 
 namespace MeteoApp.MODELS
 {
@@ -24,6 +28,9 @@ namespace MeteoApp.MODELS
         public int Localtime_epoch { get; set; }
         public DateTime Localtime { get; set; }
 
+        public string FullLocation => $"{Name},{Region}, {Country}";
+        public string DisplayName => $"{Name}, {Region}, {Country}";
+        public string SearchQuery => $"{Lat},{Lon}"; 
     }
 
     public class Current

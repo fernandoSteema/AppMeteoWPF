@@ -32,6 +32,29 @@ namespace AppMeteo.Controllers
             client = new HttpClient();
         }
 
+        public async Task<List<Location>> GetLocationSuggestionsAsync(string query)
+        {
+            try
+            {
+                if(string.IsNullOrEmpty(query) || query.Length < 3)
+                    return new List<Location>();
+
+                string url = $"http://api.weatherapi.com/v1/search.json?key={API_KEY}&q={query}";
+
+                HttpResponseMessage response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                string responseJson = await response.Content.ReadAsStringAsync();
+                List<Location> suggestions = JsonConvert.DeserializeObject<List<Location>>(responseJson);
+
+                return suggestions ?? new List<Location>();
+            }
+            catch (Exception ex) 
+            {
+                return new List<Location>();
+            }
+        }
+
         public async Task<WeatherResponse> GetCurrentTemperatura(string city)
         {
             try
@@ -184,6 +207,8 @@ namespace AppMeteo.Controllers
                 throw new Exception($"Error al obtener las temperaturas diarias: {ex.Message}");
             }
         }
+
+
 
 
     }

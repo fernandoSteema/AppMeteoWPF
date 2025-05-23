@@ -8,5 +8,8 @@
     <Setting Name="lang" Type="System.String" Scope="User">
       <Value Profile="(Default)">en.txt</Value>
     </Setting>
+    <Setting Name="RecentCities" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

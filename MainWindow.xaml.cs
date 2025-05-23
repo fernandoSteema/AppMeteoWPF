@@ -4,11 +4,11 @@ using System.IO;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
-
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using AppMeteo.Controllers;
+using System.Timers; // Asegúrate de tener este using
 using MeteoApp.MODELS;
 using Steema.TeeChart;
 using Steema.TeeChart.Drawing;
@@ -46,17 +46,37 @@ namespace AppMeteo
         // Lists
         List<string> lstIconUrls = new List<string>();
         private List<double> verticalLinePositions = new List<double>();
+        private List<string> recentCities = new List<string>();
+        private const int MAX_RECENT_CITIES = 10; 
 
         // Variables
         bool eventAdded = false;
         public bool btnDayActivate = true;
         public string currentCity;
+
+        //SuggestionCities
+        private System.Timers.Timer searchTimer;
+        private List<Location> currentSuggestions = new List<Location>();
+        private bool isSelectingSuggestion = false;
         #endregion
 
 
         public MainWindow()
         {
             InitializeComponent();
+            InitializeSearchTimer();
+            
+            #region RECENT CITIES
+            LoadRecentCities();
+            UpdateRecentCitiesList();
+
+            #endregion
+
+            //recentCities.Clear();
+            //lstCities.Items.Clear();
+            //SaveRecentCities();
+
+
             weatherController = new WeatherController();
             currentTemperature = new WeatherResponse();
             AppMeteo.Languages.Language.ChangeLenguage(Properties.Settings.Default.lang);
@@ -98,7 +118,118 @@ namespace AppMeteo
 
             #endregion
 
+        }
 
+        private void InitializeSearchTimer()
+        {
+            searchTimer = new System.Timers.Timer(500); // 500ms delay
+            searchTimer.Elapsed += async (s, e) => await SearchLocationsAsync();
+            searchTimer.AutoReset = false;
+        }
+
+        private async Task SearchLocationsAsync()
+        {
+            await Dispatcher.InvokeAsync(async () =>
+            {
+                try
+                {
+                    string query = txtSearch.Text?.Trim();
+                    if (!string.IsNullOrEmpty(query) && query.Length >= 3)
+                    {
+                        var suggestions = await weatherController.GetLocationSuggestionsAsync(query);
+                        currentSuggestions = suggestions;
+
+                        if (suggestions.Any())
+                        {
+                            suggestionsList.ItemsSource = suggestions;
+                            suggestionsPopup.IsOpen = true;
+                        }
+                        else
+                        {
+                            suggestionsPopup.IsOpen = false;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    suggestionsPopup.IsOpen = false;
+                }
+            });
+        }
+
+        private void LoadRecentCities()
+        {
+            try
+            {
+                string savedCities = Properties.Settings.Default.RecentCities;
+                if (!string.IsNullOrEmpty(savedCities)) 
+                {
+                    recentCities = savedCities.Split('|').ToList();
+                    UpdateRecentCitiesList();
+                }
+            }
+            catch (Exception ex) 
+            {
+                // Log error if needed
+                recentCities = new List<string>();
+
+            }
+        }
+
+        private void SaveRecentCities()
+        {
+            try
+            {
+                Properties.Settings.Default.RecentCities = string.Join("|", recentCities);
+                Properties.Settings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                // Log error if needed
+            }
+        }
+
+        // 4. Método para añadir una ciudad a recientes
+        private void AddToRecentCities(string cityName)
+        {
+            if (string.IsNullOrWhiteSpace(cityName)) return;
+
+            // Convertir a formato título (primera letra mayúscula)
+            cityName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(cityName.ToLower());
+
+            // Remover si ya existe (para moverla al inicio)
+            recentCities.Remove(cityName);
+
+            // Añadir al inicio de la lista
+            recentCities.Insert(0, cityName);
+
+            // Mantener solo las últimas MAX_RECENT_CITIES ciudades
+            if (recentCities.Count > MAX_RECENT_CITIES)
+            {
+                recentCities = recentCities.Take(MAX_RECENT_CITIES).ToList();
+            }
+
+            // Actualizar la UI y guardar
+            UpdateRecentCitiesList();
+            SaveRecentCities();
+        }
+
+        // 5. Método para actualizar la lista visual
+        private void UpdateRecentCitiesList()
+        {
+            lstCities.Items.Clear();
+
+            foreach (string city in recentCities)
+            {
+                ListBoxItem item = new ListBoxItem
+                {
+                    Content = city,
+                    Margin = new Thickness(5, 2, 5, 2),
+                    Padding = new Thickness(10, 5, 10, 5)
+                };
+
+                lstCities.Items.Add(item);
+            }
         }
 
 
@@ -243,7 +374,7 @@ namespace AppMeteo
         ///  Gets the current temperature of the specified city and updates the UI elements.
         /// </summary>
         /// <param name="city">The city for which to get the temperature</param>
-        private async void GetCurrentTemperature(string city)
+        private async Task<bool> GetCurrentTemperatureAsync(string city)
         {
             currentTemperature = await weatherController.GetCurrentTemperatura(city);
 
@@ -254,6 +385,7 @@ namespace AppMeteo
                 txtRegion.Text = $"{currentTemperature.Location.Region}, {currentTemperature.Location.Country}";
                 string iconUrl = $"https:{currentTemperature.Current.condition.Icon}";
                 imgWeatherIcon.Source = new BitmapImage(new Uri(iconUrl));
+                return true;
             }
             else
             {
@@ -261,9 +393,11 @@ namespace AppMeteo
                 txtCity.Text = "City not found";
                 txtRegion.Text = "";
                 imgWeatherIcon.Source = null;
+                return false;
             }
         }
-        
+
+
 
         /// <summary>
         /// Retrieves the 7-day weather forecast for the specified city and displays it in a bar chart.
@@ -767,22 +901,9 @@ namespace AppMeteo
         #region EVENT HANDLERS
 
         // Search button (executed when the search button is clicked)
-        private void btnSearch_Click_1(object sender, RoutedEventArgs e)
+        private async void btnSearch_Click_1(object sender, RoutedEventArgs e)
         {
-            string city = txtSearch.Text.Trim();
-
-            if (!eventAdded)
-            {
-                ChartTemp.AfterDraw += ChartTemp_AfterDraw1;
-                eventAdded = true;
-            }
-
-            if (!string.IsNullOrEmpty(city))
-            {
-                GetCurrentTemperature(city);
-                GetAllTemperaturesByDays(city);
-                GetTemperatureAndHumidity(city);
-            }
+            await SearchWeather();
         }
 
         // Button for displaying hourly temperatures (loads the 3-day graph but displays each day's temperature by hour)
@@ -798,8 +919,8 @@ namespace AppMeteo
 
             if (!string.IsNullOrEmpty(city))
             {
+                GetCurrentTemperatureAsync(city);
                 GetAllTemperatures(city);
-                GetCurrentTemperature(city);
                 GetTemperatureAndHumidity(city);
 
                 if (ChartTemp.Series.Count > 0 && ChartTemp.Series[0] is Bar barSeries)
@@ -829,11 +950,11 @@ namespace AppMeteo
                 ChartTemp.Invalidate(); 
             }
         }
-        private void txtSearch_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private async void txtSearch_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (e.Key == Key.Enter)
+            if (e.Key == Key.Enter && !suggestionsPopup.IsOpen)
             {
-                btnSearch_Click_1(sender, e);
+                await SearchWeather();
             }
         }
         #endregion
@@ -1061,7 +1182,7 @@ namespace AppMeteo
 
         }
 
-        private void lstCities_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private async void lstCities_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             if (lstCities.SelectedItem is ListBoxItem selectedItem)
             {
@@ -1080,9 +1201,14 @@ namespace AppMeteo
 
             if (!string.IsNullOrEmpty(city))
             {
-                GetCurrentTemperature(city);
-                GetAllTemperaturesByDays(city);
-                GetTemperatureAndHumidity(city);
+                bool cityFound = await GetCurrentTemperatureAsync(city);
+
+                if (cityFound) 
+                {
+                    GetAllTemperaturesByDays(city);
+                    GetTemperatureAndHumidity(city);
+                }
+                
             }
         }
 
@@ -1170,6 +1296,133 @@ namespace AppMeteo
             };
 
             Process.Start(psi);
+        }
+
+        private void suggestionsList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (suggestionsList.SelectedItem is Location selected)
+            {
+                SelectSuggestion(selected);
+            }
+        }
+        private void SelectSuggestion(Location suggestion)
+        {
+            isSelectingSuggestion = true;
+            txtSearch.Text = suggestion.DisplayName;
+            txtSearch.Tag = suggestion; // Guardar la sugerencia seleccionada
+            suggestionsPopup.IsOpen = false;
+            isSelectingSuggestion = false;
+
+            // Mover el cursor al final
+            txtSearch.CaretIndex = txtSearch.Text.Length;
+        }
+
+        private void txtSearch_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (suggestionsPopup.IsOpen) 
+            {
+                switch (e.Key) 
+                {
+                    case Key.Down:
+                        if (suggestionsList.SelectedIndex < suggestionsList.Items.Count - 1)
+                            suggestionsList.SelectedIndex++;
+                        else
+                            suggestionsList.SelectedIndex = 0;
+                        e.Handled = true;
+                        break;
+
+                    case Key.Up:
+                        if (suggestionsList.SelectedIndex > 0)
+                            suggestionsList.SelectedIndex--;
+                        else
+                            suggestionsList.SelectedIndex = suggestionsList.Items.Count - 1;
+                        e.Handled = true;
+                        break;
+
+                    case Key.Enter:
+                        if (suggestionsList.SelectedItem is Location selected)
+                        {
+                            SelectSuggestion(selected);
+                        }
+                        e.Handled = true;
+                        break;
+
+                    case Key.Escape:
+                        suggestionsPopup.IsOpen = false;
+                        e.Handled = true;
+                        break;
+
+                }
+            }
+        }
+
+        private async Task SearchWeather()
+        {
+            Location selectedLocation = txtSearch.Tag as Location;
+            string searchQuery;
+            string displayName;
+
+            if (selectedLocation != null)
+            {
+                // Usar coordenadas para mayor precisión
+                searchQuery = selectedLocation.SearchQuery;
+                displayName = selectedLocation.DisplayName;
+            }
+            else
+            {
+                searchQuery = txtSearch.Text?.Trim();
+                displayName = searchQuery;
+            }
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                try
+                {
+                    bool cityFound = await GetCurrentTemperatureAsync(searchQuery);
+                    if (cityFound)
+                    {
+                        AddToRecentCities(displayName);
+                        GetAllTemperaturesByDays(searchQuery);
+                        GetTemperatureAndHumidity(searchQuery);
+                    }
+                    else
+                    {
+                        MessageBox.Show("No se encontró la ciudad especificada.", "Ciudad no encontrada",
+                            MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error al buscar el clima: {ex.Message}", "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void txtSearch_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Pequeño delay para permitir click en sugerencias
+            Task.Delay(150).ContinueWith(_ =>
+            {
+                Dispatcher.Invoke(() => suggestionsPopup.IsOpen = false);
+            });
+        }
+
+        private async void txtSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (isSelectingSuggestion) return; // Evitar búsqueda cuando se selecciona una sugerencia
+
+            string query = txtSearch.Text?.Trim();
+
+            if (string.IsNullOrEmpty(query) || query.Length < 3)
+            {
+                suggestionsPopup.IsOpen = false;
+                return;
+            }
+
+            // Reiniciar el timer
+            searchTimer?.Stop();
+            searchTimer?.Start();
         }
 
         //private void scrollBarChart_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

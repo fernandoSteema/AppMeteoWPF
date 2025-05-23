@@ -46,5 +46,17 @@ namespace AppMeteo.Properties {
                 this["lang"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string RecentCities {
+            get {
+                return ((string)(this["RecentCities"]));
+            }
+            set {
+                this["RecentCities"] = value;
+            }
+        }
     }
 }
